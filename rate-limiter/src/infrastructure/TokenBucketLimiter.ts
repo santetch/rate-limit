@@ -1,26 +1,12 @@
-import { RateLimiter, RateLimitStatus } from './RateLimiter';
+import { RateLimiter, RateLimitStatus } from '../domain/RateLimiter';
 import { Logger, NoOpLogger } from './Logger';
 
-/**
- * TokenBucketLimiter implements the Token Bucket algorithm.
- * 
- * Design Choices:
- * - In-memory storage using a Map.
- * - Lazy token replenishment: Tokens are added when a request arrives, 
- *   based on the time elapsed since the last request.
- * - Efficient: O(1) time complexity for `allow()` and O(1) space per active key.
- */
 export class TokenBucketLimiter implements RateLimiter {
   private readonly buckets: Map<string, BucketState>;
   private readonly capacity: number;
   private readonly refillRate: number; // tokens per millisecond
   private readonly logger: Logger;
 
-  /**
-   * @param capacity Maximum number of tokens the bucket can hold.
-   * @param refillRatePerSecond Number of tokens added to the bucket every second.
-   * @param logger Optional logger for monitoring.
-   */
   constructor(capacity: number, refillRatePerSecond: number, logger: Logger = new NoOpLogger()) {
     if (capacity <= 0) throw new Error('Capacity must be greater than 0');
     if (refillRatePerSecond <= 0) throw new Error('Refill rate must be greater than 0');
@@ -31,9 +17,6 @@ export class TokenBucketLimiter implements RateLimiter {
     this.logger = logger;
   }
 
-  /**
-   * Checks if a request is allowed for the given key.
-   */
   public async allow(key: string): Promise<boolean> {
     const now = Date.now();
     const state = this.getOrInitializeBucket(key, now);
@@ -51,8 +34,32 @@ export class TokenBucketLimiter implements RateLimiter {
   }
 
   /**
-   * Returns the current status of the rate limit for the given key.
+   * Waits until a token is available and then consumes it.
    */
+  public async wait(key: string): Promise<void> {
+    const now = Date.now();
+    const state = this.getOrInitializeBucket(key, now);
+
+    this.refill(state, now);
+
+    if (state.tokens >= 1) {
+      state.tokens -= 1;
+      return;
+    }
+
+    // Calculate when the next token will be available
+    // We also need to account for other requests waiting in line
+    // To do this, we "reserve" a token by allowing state.tokens to go negative
+    state.tokens -= 1;
+    const waitTime = Math.abs(state.tokens) / this.refillRate;
+
+    this.logger.info(`Key ${key} is waiting for ${Math.round(waitTime)}ms`);
+
+    return new Promise((resolve) => {
+      setTimeout(resolve, waitTime);
+    });
+  }
+
   public async getLimitStatus(key: string): Promise<RateLimitStatus> {
     const now = Date.now();
     const state = this.getOrInitializeBucket(key, now);
@@ -69,7 +76,7 @@ export class TokenBucketLimiter implements RateLimiter {
 
     return {
       allowed: currentTokens >= 1,
-      remaining: Math.floor(currentTokens),
+      remaining: Math.max(0, Math.floor(currentTokens)),
       limit: this.capacity,
       resetTime: Math.ceil(resetTime),
     };
@@ -91,12 +98,14 @@ export class TokenBucketLimiter implements RateLimiter {
     const elapsedTime = now - state.lastRefillTime;
     const tokensToAdd = elapsedTime * this.refillRate;
     
+    // We allow tokens to be negative if they are "reserved" by wait()
+    // but when refilling, we cap it at capacity
     state.tokens = Math.min(this.capacity, state.tokens + tokensToAdd);
     state.lastRefillTime = now;
   }
 }
 
 interface BucketState {
-  tokens: number; // Can be fractional to handle smooth refill
+  tokens: number;
   lastRefillTime: number;
 }

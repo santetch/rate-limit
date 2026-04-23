@@ -7,40 +7,53 @@ The implementation is based on the **Token Bucket** algorithm, as described in "
 
 ## Architectural Choices
 
-### 1. Algorithm: Token Bucket
-I chose the **Token Bucket** algorithm for the following reasons:
-- **Simplicity**: It is easy to understand and implement correctly.
-- **Memory Efficiency**: It only requires storing two values per key: the current token count and the timestamp of the last refill.
-- **Burst Handling**: It allows for bursts of traffic up to the bucket's capacity, which is a common requirement for many APIs.
-- **Performance**: Check and update operations are O(1).
+### 1. Algorithm: Token Bucket with Wait Support
+I extended the **Token Bucket** algorithm to support a `wait()` operation:
+- **Waitable Limiter**: If no tokens are available, the limiter calculates the time until the next token is ready and returns a `Promise` that resolves after that duration (using `setTimeout`).
+- **Token Reservation**: To support multiple concurrent requests waiting in line, the limiter "reserves" tokens by allowing the token count to go negative. This ensures that the next request waits for a duration that accounts for all previous waiting requests.
+- **Queueing Behavior**: This effectively creates a queue where requests are processed at a fixed rate (1 per second by default).
 
-### 2. Implementation Strategy: Lazy Refill
-Instead of having a background thread or timer refilling tokens for every active bucket (which would be inefficient and hard to scale), I implemented **Lazy Refill**. Tokens are only recalculated when a request for a specific key arrives. This ensures that we only consume CPU cycles for active users.
+### 2. NestJS Integration
+- **Modular Design**: Structured the application using DDD principles:
+  - `domain/`: Business entities (`Pokemon`) and repository/service interfaces.
+  - `application/`: Application services (`PokemonService`) orchestrating domain logic.
+  - `infrastructure/`: External implementations (`PokeApiClient`, `TokenBucketLimiter`).
+  - `interface/`: Controllers (`PokemonController`) handling HTTP requests.
+- **Dependency Injection**: Used NestJS DI to decouple the application logic from the rate limiter implementation.
 
-### 3. Language & Stack
-- **TypeScript**: Provides strong typing, which helps prevent common bugs in rate-limiting logic (e.g., mixing milliseconds and seconds).
-- **Jest**: Used for testing with "Fake Timers" to reliably test time-dependent logic without actual waiting.
-- **In-Memory Storage**: For this prototype, I used a `Map`. In a production distributed system, this would be replaced with a fast key-value store like **Redis** using atomic `INCR` or Lua scripts to prevent race conditions.
+### 3. Pokemon API Client
+- **Resilient Client**: The `PokeApiClient` fetches random Pokemon from the PokeAPI (IDs 1-150).
+- **Integrated Limiting**: The client automatically calls `rateLimiter.wait()` before making the external HTTP call, ensuring compliance with the specified rate limit.
+
+### 4. Observability & Documentation
+- **Swagger**: Integrated Swagger UI at `/api/docs` for endpoint documentation.
+- **Sentry**: Added Sentry for error tracking and performance monitoring (tracing).
+- **Logging**: A custom `ConsoleLogger` tracks allowed, denied, and waiting requests.
 
 ## Trade-offs
 
 | Feature | Trade-off |
 |---------|-----------|
 | **In-Memory** | High performance and low latency, but not shared across multiple instances (nodes). For a multi-node setup, Redis is preferred. |
-| **Lazy Refill** | Low CPU overhead, but requires a small calculation on every request. |
+| **Token Reservation** | Simple queueing logic, but long queues can lead to high memory usage (promises) and potential timeouts in upstream clients. |
 | **Floating Point Tokens** | Allows for smooth, fractional token replenishment, but requires care with precision (though not an issue for standard rate limits). |
 
 ## Error Handling & Defensive Design
-- **Validation**: The constructor validates that capacity and refill rates are positive.
-- **Independence**: Rate limits are isolated per key (e.g., IP or User ID).
-- **Observability**: A `Logger` interface is integrated to track "allowed" vs "denied" requests, which is crucial for production monitoring and debugging.
+- **Graceful Failures**: PokeAPI failures are caught and transformed into `InternalServerErrorException`.
+- **Validation**: Constructor validation ensures valid rate limits.
+- **DI Isolation**: The application doesn't know *how* the rate limit is enforced, only that it *is*.
 
 ## How I Used AI
-I used Antigravity (powered by Gemini) to:
-- Scaffolding the project structure (TypeScript + Jest).
-- Implementing the core logic of the Token Bucket algorithm.
-- Writing comprehensive tests using `jest.useFakeTimers()`.
-- Documenting the design choices in this file.
+- Scaffolding NestJS structure.
+- Implementing the "Reservation" logic for the Token Bucket.
+- Writing integration tests with `supertest` and fake timers.
+- Troubleshooting TypeScript decorator and module resolution issues.
+
+## How to Run
+1. Install dependencies: `yarn install`
+2. Run tests: `yarn test`
+3. Start server: `yarn start` (or `npx ts-node rate-limiter/src/main.ts`)
+
 
 I have reviewed all the code and ensured it follows the "Philosophy of Software Design" (APOSD) principles:
 - **Deep Modules**: The `TokenBucketLimiter` provides a simple interface (`allow`) while hiding the complexity of token math and refill logic.
