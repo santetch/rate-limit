@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { PokemonService } from './pokemon.service';
-import { Pokemon } from './pokemon.interface';
+import { PokemonService } from '../application/pokemon.service';
+import { Pokemon } from '../domain/pokemon.interface';
 
 @ApiTags('Pokemon')
 @Controller('random-pokemon')
