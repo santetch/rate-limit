@@ -8,7 +8,7 @@ Object.defineProperty(exports, "TokenBucketLimiter", {
         return TokenBucketLimiter;
     }
 });
-const _Logger = require("./Logger");
+const _logger = require("./logger");
 let TokenBucketLimiter = class TokenBucketLimiter {
     async allow(key) {
         const now = Date.now();
@@ -79,7 +79,7 @@ let TokenBucketLimiter = class TokenBucketLimiter {
         state.tokens = Math.min(this.capacity, state.tokens + tokensToAdd);
         state.lastRefillTime = now;
     }
-    constructor(capacity, refillRatePerSecond, logger = new _Logger.NoOpLogger()){
+    constructor(capacity, refillRatePerSecond, logger = new _logger.NoOpLogger()){
         if (capacity <= 0) throw new Error('Capacity must be greater than 0');
         if (refillRatePerSecond <= 0) throw new Error('Refill rate must be greater than 0');
         this.buckets = new Map();

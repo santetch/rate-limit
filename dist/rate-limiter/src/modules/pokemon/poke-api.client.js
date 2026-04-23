@@ -11,7 +11,7 @@ Object.defineProperty(exports, "PokeApiClient", {
 const _common = require("@nestjs/common");
 const _axios = require("@nestjs/axios");
 const _rxjs = require("rxjs");
-const _RateLimiter = require("../domain/RateLimiter");
+const _ratelimiterinterface = require("../rate-limiter/rate-limiter.interface");
 function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -56,6 +56,6 @@ PokeApiClient = _ts_decorate([
     _ts_metadata("design:type", Function),
     _ts_metadata("design:paramtypes", [
         typeof _axios.HttpService === "undefined" ? Object : _axios.HttpService,
-        typeof _RateLimiter.RateLimiter === "undefined" ? Object : _RateLimiter.RateLimiter
+        typeof _ratelimiterinterface.RateLimiter === "undefined" ? Object : _ratelimiterinterface.RateLimiter
     ])
 ], PokeApiClient);

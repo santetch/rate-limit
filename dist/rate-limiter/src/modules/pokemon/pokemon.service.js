@@ -9,7 +9,7 @@ Object.defineProperty(exports, "PokemonService", {
     }
 });
 const _common = require("@nestjs/common");
-const _Pokemon = require("../domain/Pokemon");
+const _pokemoninterface = require("./pokemon.interface");
 function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -37,6 +37,6 @@ PokemonService = _ts_decorate([
     _ts_param(0, (0, _common.Inject)('PokemonClient')),
     _ts_metadata("design:type", Function),
     _ts_metadata("design:paramtypes", [
-        typeof _Pokemon.PokemonClient === "undefined" ? Object : _Pokemon.PokemonClient
+        typeof _pokemoninterface.PokemonClient === "undefined" ? Object : _pokemoninterface.PokemonClient
     ])
 ], PokemonService);

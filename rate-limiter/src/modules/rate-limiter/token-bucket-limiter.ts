@@ -1,5 +1,5 @@
-import { RateLimiter, RateLimitStatus } from '../domain/RateLimiter';
-import { Logger, NoOpLogger } from './Logger';
+import { RateLimiter, RateLimitStatus } from './rate-limiter.interface';
+import { Logger, NoOpLogger } from './logger';
 
 export class TokenBucketLimiter implements RateLimiter {
   private readonly buckets: Map<string, BucketState>;

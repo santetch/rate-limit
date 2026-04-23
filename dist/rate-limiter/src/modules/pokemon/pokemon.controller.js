@@ -10,7 +10,7 @@ Object.defineProperty(exports, "PokemonController", {
 });
 const _common = require("@nestjs/common");
 const _swagger = require("@nestjs/swagger");
-const _PokemonService = require("../application/PokemonService");
+const _pokemonservice = require("./pokemon.service");
 function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -56,6 +56,6 @@ PokemonController = _ts_decorate([
     (0, _common.Controller)('random-pokemon'),
     _ts_metadata("design:type", Function),
     _ts_metadata("design:paramtypes", [
-        typeof _PokemonService.PokemonService === "undefined" ? Object : _PokemonService.PokemonService
+        typeof _pokemonservice.PokemonService === "undefined" ? Object : _pokemonservice.PokemonService
     ])
 ], PokemonController);

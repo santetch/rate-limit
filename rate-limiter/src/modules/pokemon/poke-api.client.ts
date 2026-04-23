@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException, Inject } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { Pokemon, PokemonClient } from '../domain/Pokemon';
-import { RateLimiter } from '../domain/RateLimiter';
+import { Pokemon, PokemonClient } from './pokemon.interface';
+import { RateLimiter } from '../rate-limiter/rate-limiter.interface';
 
 @Injectable()
 export class PokeApiClient implements PokemonClient {

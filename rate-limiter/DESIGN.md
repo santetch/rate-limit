@@ -13,13 +13,14 @@ I extended the **Token Bucket** algorithm to support a `wait()` operation:
 - **Token Reservation**: To support multiple concurrent requests waiting in line, the limiter "reserves" tokens by allowing the token count to go negative. This ensures that the next request waits for a duration that accounts for all previous waiting requests.
 - **Queueing Behavior**: This effectively creates a queue where requests are processed at a fixed rate (1 per second by default).
 
-### 2. NestJS Integration
-- **Modular Design**: Structured the application using DDD principles:
-  - `domain/`: Business entities (`Pokemon`) and repository/service interfaces.
-  - `application/`: Application services (`PokemonService`) orchestrating domain logic.
-  - `infrastructure/`: External implementations (`PokeApiClient`, `TokenBucketLimiter`).
-  - `interface/`: Controllers (`PokemonController`) handling HTTP requests.
-- **Dependency Injection**: Used NestJS DI to decouple the application logic from the rate limiter implementation.
+### 2. NestJS Modular Integration
+The application is organized into feature modules to follow NestJS best practices:
+- **`RateLimiterModule`**: A global module that provides the `RateLimiter` instance. This allows any other module to easily inject the rate limiter.
+- **`PokemonModule`**: Encapsulates all Pokemon-related logic, including the Controller, Service, and the PokeAPI Client.
+- **Dependency Injection**: Used NestJS DI with string tokens (e.g., `@Inject('RateLimiter')`) to decouple interfaces from implementations, facilitating easier testing and future-proofing.
+- **Directory Structure**:
+  - `src/modules/pokemon/`: Controller, Service, Interface, and Client.
+  - `src/modules/rate-limiter/`: Module, Interface, Limiter implementation, and Logger.
 
 ### 3. Pokemon API Client
 - **Resilient Client**: The `PokeApiClient` fetches random Pokemon from the PokeAPI (IDs 1-150).
