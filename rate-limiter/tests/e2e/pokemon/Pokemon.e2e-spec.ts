@@ -6,6 +6,8 @@ import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
 import { AppModule } from '../../../src/app.module';
 
+import { DataSource } from 'typeorm';
+
 describe('PokemonController (Integration)', () => {
   let app: INestApplication;
   let httpService: HttpService;
@@ -18,6 +20,10 @@ describe('PokemonController (Integration)', () => {
     app = moduleFixture.createNestApplication();
     httpService = moduleFixture.get<HttpService>(HttpService);
     await app.init();
+    
+    // Clear database before each test
+    const dataSource = app.get(DataSource);
+    await dataSource.query('TRUNCATE TABLE appearances, pokemons, pokemon_types, types CASCADE');
   });
 
   afterEach(async () => {

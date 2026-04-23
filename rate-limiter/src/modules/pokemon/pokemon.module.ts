@@ -1,12 +1,19 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PokemonController } from './interface/pokemon.controller';
 import { PokemonService } from './application/pokemon.service';
 import { PokeApiClient } from './infrastructure/poke-api.client';
-import { InMemoryPokemonRepository } from './infrastructure/in-memory-pokemon.repository';
+import { TypeormPokemonRepository } from './infrastructure/typeorm-pokemon.repository';
+import { Pokemon } from './domain/entities/pokemon.entity';
+import { Type } from './domain/entities/type.entity';
+import { Appearance } from './domain/entities/appearance.entity';
 
 @Module({
-  imports: [HttpModule],
+  imports: [
+    HttpModule,
+    TypeOrmModule.forFeature([Pokemon, Type, Appearance]),
+  ],
   controllers: [PokemonController],
   providers: [
     PokemonService,
@@ -16,7 +23,7 @@ import { InMemoryPokemonRepository } from './infrastructure/in-memory-pokemon.re
     },
     {
       provide: 'IPokemonRepository',
-      useClass: InMemoryPokemonRepository,
+      useClass: TypeormPokemonRepository,
     },
   ],
 })
