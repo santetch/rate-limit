@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common';
-import { TokenBucketLimiter } from './token-bucket-limiter';
-import { ConsoleLogger } from './logger';
+import { TokenBucketLimiter } from './infrastructure/token-bucket-limiter';
+import { ConsoleLogger } from './infrastructure/logger';
 
 @Global() // Make it global so other modules can use the rate limiter easily
 @Module({

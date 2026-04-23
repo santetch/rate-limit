@@ -1,4 +1,4 @@
-import { RateLimiter, RateLimitStatus } from './rate-limiter.interface';
+import { RateLimiter, RateLimitStatus } from '../domain/rate-limiter.interface';
 import { Logger, NoOpLogger } from './logger';
 
 export class TokenBucketLimiter implements RateLimiter {
