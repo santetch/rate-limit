@@ -25,4 +25,10 @@ export class PokemonController {
   async getRandomPokemon(): Promise<Pokemon> {
     return this.pokemonService.getRandomPokemon();
   }
+
+  @Get('ranking')
+  @ApiOperation({ summary: 'Get Pokemon appearance ranking' })
+  async getRanking() {
+    return this.pokemonService.getRanking();
+  }
 }

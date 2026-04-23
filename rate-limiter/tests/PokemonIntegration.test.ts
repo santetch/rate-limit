@@ -72,4 +72,32 @@ describe('PokemonController (Integration)', () => {
     // We use a small buffer for execution time
     expect(duration).toBeGreaterThanOrEqual(1000);
   });
+
+  it('GET /random-pokemon/ranking should return the appearance ranking', async () => {
+    const mockPokemon1 = {
+      data: { id: 25, name: 'pikachu', types: [], sprites: {} },
+    };
+    const mockPokemon2 = {
+      data: { id: 1, name: 'bulbasaur', types: [], sprites: {} },
+    };
+
+    const spy = jest.spyOn(httpService, 'get');
+    spy.mockReturnValueOnce(of(mockPokemon1 as any))
+       .mockReturnValueOnce(of(mockPokemon2 as any))
+       .mockReturnValueOnce(of(mockPokemon1 as any));
+
+    // Make 3 requests
+    await request(app.getHttpServer()).get('/random-pokemon');
+    await request(app.getHttpServer()).get('/random-pokemon');
+    await request(app.getHttpServer()).get('/random-pokemon');
+
+    const response = await request(app.getHttpServer())
+      .get('/random-pokemon/ranking')
+      .expect(200);
+
+    expect(response.body).toEqual([
+      { name: 'pikachu', appearances: 2 },
+      { name: 'bulbasaur', appearances: 1 },
+    ]);
+  });
 });

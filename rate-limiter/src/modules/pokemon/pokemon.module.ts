@@ -3,6 +3,7 @@ import { HttpModule } from '@nestjs/axios';
 import { PokemonController } from './interface/pokemon.controller';
 import { PokemonService } from './application/pokemon.service';
 import { PokeApiClient } from './infrastructure/poke-api.client';
+import { InMemoryPokemonRepository } from './infrastructure/in-memory-pokemon.repository';
 
 @Module({
   imports: [HttpModule],
@@ -12,6 +13,10 @@ import { PokeApiClient } from './infrastructure/poke-api.client';
     {
       provide: 'PokemonClient',
       useClass: PokeApiClient,
+    },
+    {
+      provide: 'IPokemonRepository',
+      useClass: InMemoryPokemonRepository,
     },
   ],
 })
