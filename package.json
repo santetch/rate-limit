@@ -3,6 +3,8 @@
   "packageManager": "yarn@4.5.3",
   "scripts": {
     "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:e2e": "jest tests/e2e",
     "test:cov": "jest --coverage",
     "start": "nest start swc -w"
   },

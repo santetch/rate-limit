@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { PokemonService } from '../src/modules/pokemon/application/pokemon.service';
-import { Pokemon, PokemonClient, IPokemonRepository } from '../src/modules/pokemon/domain/pokemon.interface';
+import { PokemonService } from '../../../src/modules/pokemon/application/pokemon.service';
+import { Pokemon, PokemonClient, IPokemonRepository } from '../../../src/modules/pokemon/domain/pokemon.interface';
 
 describe('PokemonService', () => {
   let service: PokemonService;

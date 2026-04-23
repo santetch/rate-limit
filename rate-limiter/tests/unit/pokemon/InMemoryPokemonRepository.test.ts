@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { InMemoryPokemonRepository } from '../src/modules/pokemon/infrastructure/in-memory-pokemon.repository';
-import { Pokemon } from '../src/modules/pokemon/domain/pokemon.interface';
+import { InMemoryPokemonRepository } from '../../../src/modules/pokemon/infrastructure/in-memory-pokemon.repository';
+import { Pokemon } from '../../../src/modules/pokemon/domain/pokemon.interface';
 
 describe('InMemoryPokemonRepository', () => {
   let repository: InMemoryPokemonRepository;

@@ -4,7 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../../../src/app.module';
 
 describe('PokemonController (Integration)', () => {
   let app: INestApplication;

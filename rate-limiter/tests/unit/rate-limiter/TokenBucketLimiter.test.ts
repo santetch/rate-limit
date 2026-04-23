@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { TokenBucketLimiter } from '../src/modules/rate-limiter/infrastructure/token-bucket-limiter';
+import { TokenBucketLimiter } from '../../../src/modules/rate-limiter/infrastructure/token-bucket-limiter';
 
 describe('TokenBucketLimiter', () => {
   beforeEach(() => {
