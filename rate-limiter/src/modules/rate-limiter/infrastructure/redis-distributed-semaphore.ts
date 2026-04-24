@@ -56,9 +56,12 @@ export class RedisDistributedSemaphore implements DistributedSemaphore {
         const slotKey = this.slotKey(key, i);
         const acquired = await this.tryAcquireSlot(slotKey, ownerId);
         if (acquired) {
-          this.logger.info(
-            `Acquired semaphore slot ${i} for key "${key}" (owner: ${ownerId})`,
-          );
+          this.logger.info('semaphore acquired', {
+            key,
+            slot: i,
+            ownerId,
+            waitMs: Date.now() - startTime,
+          });
           return ownerId;
         }
       }
@@ -72,9 +75,11 @@ export class RedisDistributedSemaphore implements DistributedSemaphore {
       }
 
       // Wait before retrying
-      this.logger.info(
-        `All ${this.options.maxSlots} slots busy for key "${key}", retrying in ${this.options.retryIntervalMs}ms...`,
-      );
+      this.logger.info('semaphore contended, retrying', {
+        key,
+        maxSlots: this.options.maxSlots,
+        retryIntervalMs: this.options.retryIntervalMs,
+      });
       await this.sleep(this.options.retryIntervalMs);
     }
   }
@@ -86,16 +91,12 @@ export class RedisDistributedSemaphore implements DistributedSemaphore {
 
       if (currentOwner === ownerId) {
         await this.redis.del(slotKey);
-        this.logger.info(
-          `Released semaphore slot ${i} for key "${key}" (owner: ${ownerId})`,
-        );
+        this.logger.info('semaphore released', { key, slot: i, ownerId });
         return;
       }
     }
 
-    this.logger.warn(
-      `Attempted to release semaphore for key "${key}" with owner "${ownerId}", but no matching slot found`,
-    );
+    this.logger.warn('semaphore release: no matching slot', { key, ownerId });
   }
 
   /**

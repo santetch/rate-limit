@@ -1,5 +1,8 @@
 import Redis from 'ioredis';
 import { dataSource } from './data-source';
+import { rootLogger } from '../logging/logger.config';
+
+const logger = rootLogger.child({ context: 'Migrations' });
 
 const LOCK_KEY = 'migrations:lock';
 const LOCK_TTL_SECONDS = 60; // auto-expires if the process crashes
@@ -8,7 +11,6 @@ const LOCK_TIMEOUT_MS = 120_000;
 
 /**
  * Acquire a Redis mutex using SET NX EX (atomic set-if-not-exists).
- * Returns the owner ID if the lock was acquired, or null otherwise.
  */
 async function tryAcquireLock(redis: Redis, ownerId: string): Promise<boolean> {
   const result = await redis.set(
@@ -36,7 +38,6 @@ async function runMigrations(): Promise<void> {
     lazyConnect: true,
   });
 
-  // Use a unique owner ID so each replica knows whether it holds the lock
   const ownerId = `${process.pid}-${Date.now()}`;
 
   try {
@@ -49,28 +50,30 @@ async function runMigrations(): Promise<void> {
     while (Date.now() - started < LOCK_TIMEOUT_MS) {
       isLeader = await tryAcquireLock(redis, ownerId);
       if (isLeader) break;
-      console.log(
-        'Another replica is running migrations, waiting...',
-      );
+      logger.info({ ownerId }, 'migration lock held by another replica, waiting');
       await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     }
 
     if (!isLeader) {
-      console.error(
-        `Could not acquire migration lock within ${LOCK_TIMEOUT_MS}ms — giving up.`,
+      logger.error(
+        { ownerId, timeoutMs: LOCK_TIMEOUT_MS },
+        'could not acquire migration lock, giving up',
       );
       process.exit(1);
     }
 
-    // --- We are the elected leader: run migrations ---
-    console.log('Acquired migration lock, initializing data source...');
+    logger.info({ ownerId }, 'migration lock acquired, initializing data source');
     await dataSource.initialize();
-    console.log('Running migrations...');
-    await dataSource.runMigrations();
-    console.log('Migrations complete');
+
+    logger.info('running migrations');
+    const ran = await dataSource.runMigrations();
+    logger.info(
+      { count: ran.length, migrations: ran.map((m) => m.name) },
+      'migrations complete',
+    );
     await dataSource.destroy();
-  } catch (err) {
-    console.error('Migration error:', err);
+  } catch (err: any) {
+    logger.error({ err: { message: err?.message, stack: err?.stack } }, 'migration error');
     process.exit(1);
   } finally {
     await releaseLock(redis, ownerId).catch(() => {});

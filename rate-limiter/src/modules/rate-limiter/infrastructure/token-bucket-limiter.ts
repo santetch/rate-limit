@@ -25,11 +25,14 @@ export class TokenBucketLimiter implements RateLimiter {
 
     if (state.tokens >= 1) {
       state.tokens -= 1;
-      this.logger.info(`Allowed request for key: ${key}. Tokens remaining: ${Math.floor(state.tokens)}`);
+      this.logger.info('rate limit allowed', {
+        key,
+        tokensRemaining: Math.floor(state.tokens),
+      });
       return true;
     }
 
-    this.logger.warn(`Rate limit exceeded for key: ${key}`);
+    this.logger.warn('rate limit exceeded', { key });
     return false;
   }
 
@@ -53,7 +56,10 @@ export class TokenBucketLimiter implements RateLimiter {
     state.tokens -= 1;
     const waitTime = Math.abs(state.tokens) / this.refillRate;
 
-    this.logger.info(`Key ${key} is waiting for ${Math.round(waitTime)}ms`);
+    this.logger.info('rate limit wait', {
+      key,
+      waitMs: Math.round(waitTime),
+    });
 
     return new Promise((resolve) => {
       setTimeout(resolve, waitTime);

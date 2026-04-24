@@ -88,6 +88,8 @@ All have sensible defaults and are pre-wired in `docker-compose.yml`:
 | `REDIS_HOST`   | `localhost`   | Redis host (semaphore + mutex)       |
 | `REDIS_PORT`   | `6379`        | Redis port                           |
 | `SENTRY_DSN`   | *(empty)*     | Enable Sentry tracing if provided    |
+| `LOG_LEVEL`    | `debug` (dev) / `info` (prod) | pino log level (`trace`/`debug`/`info`/`warn`/`error`/`fatal`/`silent`) |
+| `NODE_ENV`     | *(unset)*     | Set to `production` for JSON logs; anything else uses `pino-pretty` |
 
 ## Local Development (without Docker for the app)
 

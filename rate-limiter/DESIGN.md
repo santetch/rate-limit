@@ -69,7 +69,14 @@ The app follows NestJS best practices, with feature modules and DDD-style folder
 ### 7. Observability & Documentation
 - **Swagger**: UI at `/api/docs` (powered by `@nestjs/swagger`).
 - **Sentry**: `@sentry/nestjs` with profiling and tracing (requires `SENTRY_DSN`).
-- **Logging**: A custom `ConsoleLogger` tracks allowed/denied/waiting rate-limit decisions and semaphore acquire/release events.
+- **Logging (pino + `nestjs-pino`)**:
+  - Structured JSON in production, `pino-pretty` in development (controlled by `NODE_ENV`).
+  - Level controlled by `LOG_LEVEL` (default `debug` in dev, `info` in prod).
+  - `nestjs-pino` auto-emits one log line per HTTP request with status, method, path, and latency.
+  - Every request is assigned a `reqId` (honors an incoming `x-request-id` header, else mints a UUID) — all logs emitted during the request lifecycle share the same ID for correlation.
+  - `Authorization`, `Cookie`, and `Set-Cookie` headers are redacted at the logger level.
+  - A small framework-agnostic `Logger` interface (`info`/`warn`/`error`, each accepting an optional structured context object) is implemented by `PinoLoggerAdapter`. It's what `TokenBucketLimiter`, `RedisDistributedSemaphore`, and `PokeApiClient` log through, so those classes stay unit-testable with a `NoOpLogger` and don't depend on NestJS.
+  - Subsystems get their own `context` field via pino child loggers (`TokenBucketLimiter`, `DistributedSemaphore`, `PokeApiClient`, `Migrations`), so you can filter by component.
 
 ## Multi-Replica Architecture
 
