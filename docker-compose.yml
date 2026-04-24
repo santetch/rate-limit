@@ -16,23 +16,42 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: pokemon_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pokemon_app
     ports:
-      - "3000:3000"
+      - "3000-3001:3000"
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: root
       DB_PASSWORD: password
       DB_NAME: pokemon
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       NODE_ENV: production
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      replicas: 2
 
 volumes:
   postgres_data:
+  redis_data:

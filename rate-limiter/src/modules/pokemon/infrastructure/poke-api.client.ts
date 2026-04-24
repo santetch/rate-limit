@@ -3,14 +3,18 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { Pokemon, PokemonClient } from '../domain/pokemon.interface';
 import { RateLimiter } from '../../rate-limiter/domain/rate-limiter.interface';
+import { DistributedSemaphore } from '../../rate-limiter/domain/distributed-semaphore.interface';
+import { DISTRIBUTED_SEMAPHORE, WithSemaphore } from '../../rate-limiter/infrastructure/with-semaphore.decorator';
 
 @Injectable()
 export class PokeApiClient implements PokemonClient {
   constructor(
     private readonly httpService: HttpService,
     @Inject('RateLimiter') private readonly rateLimiter: RateLimiter,
+    @Inject(DISTRIBUTED_SEMAPHORE) public readonly distributedSemaphore: DistributedSemaphore,
   ) {}
 
+  @WithSemaphore('pokeapi')
   async getRandomPokemon(): Promise<Pokemon> {
     const randomId = Math.floor(Math.random() * 150) + 1;
     const url = `https://pokeapi.co/api/v2/pokemon/${randomId}`;

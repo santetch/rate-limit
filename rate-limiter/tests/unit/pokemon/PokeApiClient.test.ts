@@ -3,12 +3,14 @@ import { HttpService } from '@nestjs/axios';
 import { of, throwError } from 'rxjs';
 import { PokeApiClient } from '../../../src/modules/pokemon/infrastructure/poke-api.client';
 import { RateLimiter } from '../../../src/modules/rate-limiter/domain/rate-limiter.interface';
+import { DistributedSemaphore } from '../../../src/modules/rate-limiter/domain/distributed-semaphore.interface';
 import { InternalServerErrorException } from '@nestjs/common';
 
 describe('PokeApiClient', () => {
   let client: PokeApiClient;
   let mockHttpService: jest.Mocked<HttpService>;
   let mockRateLimiter: jest.Mocked<RateLimiter>;
+  let mockSemaphore: jest.Mocked<DistributedSemaphore>;
 
   beforeEach(() => {
     mockHttpService = {
@@ -21,7 +23,12 @@ describe('PokeApiClient', () => {
       getLimitStatus: jest.fn(),
     } as any;
 
-    client = new PokeApiClient(mockHttpService, mockRateLimiter);
+    mockSemaphore = {
+      acquire: jest.fn<() => Promise<string>>().mockResolvedValue('test-slot-id'),
+      release: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    };
+
+    client = new PokeApiClient(mockHttpService, mockRateLimiter, mockSemaphore);
   });
 
   it('should fetch random pokemon and respect rate limiting', async () => {
