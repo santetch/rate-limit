@@ -48,6 +48,6 @@ USER node
 
 # Expose the application port
 EXPOSE 3000
-
-# Start the application
-CMD ["node", "dist/rate-limiter/src/main.js"]
+# Start the application after running migrations
+# Runs compiled migration runner then starts the NestJS app
+CMD ["sh", "-c", "yarn migration:run:prod && yarn start:prod"]

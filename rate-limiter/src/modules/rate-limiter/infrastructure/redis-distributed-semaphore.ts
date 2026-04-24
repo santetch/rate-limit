@@ -14,7 +14,7 @@ export interface RedisSemaphoreOptions {
 }
 
 const DEFAULT_OPTIONS: RedisSemaphoreOptions = {
-  maxSlots: 2,
+  maxSlots: 1,
   slotTtlSeconds: 30,
   retryIntervalMs: 100,
   acquireTimeoutMs: 30000,
