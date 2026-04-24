@@ -8,6 +8,8 @@
     "test:cov": "jest --coverage",
     "start": "nest start swc -w",
     "build": "nest build",
+    "docker:up": "sh -c 'docker compose up --build --scale app=${0:-1}'",
+    "docker:down": "docker compose down -v",
     "typeorm": "typeorm-ts-node-commonjs -d rate-limiter/src/database/data-source.ts",
     "migration:generate": "yarn typeorm migration:generate",
     "migration:run": "yarn typeorm migration:run",

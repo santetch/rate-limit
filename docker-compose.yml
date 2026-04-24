@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000-3001:3000"
+      - "3000"
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -49,8 +49,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    deploy:
-      replicas: 2
 
 volumes:
   postgres_data:

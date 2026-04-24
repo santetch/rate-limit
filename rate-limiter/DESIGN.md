@@ -108,9 +108,10 @@ The application is organized into feature modules to follow NestJS best practice
 
 ### Docker (Multi-Replica)
 ```bash
-docker compose up --build --scale app=2
+# Start with N replicas (e.g. 3)
+docker compose up --build --scale app=3
 ```
-This starts 2 app replicas sharing the same Redis semaphore (max 2 concurrent PokeAPI connections globally).
+Docker assigns random host ports per replica. Check with `docker compose ps` to see which ports each replica is listening on. All replicas share the same Redis semaphore (max 2 concurrent PokeAPI connections globally).
 
 ### Tests
 ```bash
