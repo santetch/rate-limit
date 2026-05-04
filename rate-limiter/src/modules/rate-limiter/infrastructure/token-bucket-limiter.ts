@@ -80,11 +80,16 @@ export class TokenBucketLimiter implements RateLimiter {
         resetTime = now + (missingTokens / this.refillRate);
     }
 
+    const retryAfterMs = currentTokens >= 1
+      ? 0
+      : Math.ceil((1 - currentTokens) / this.refillRate);
+
     return {
       allowed: currentTokens >= 1,
       remaining: Math.max(0, Math.floor(currentTokens)),
       limit: this.capacity,
       resetTime: Math.ceil(resetTime),
+      retryAfterMs,
     };
   }
 

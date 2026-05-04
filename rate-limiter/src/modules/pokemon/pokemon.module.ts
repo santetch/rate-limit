@@ -8,6 +8,7 @@ import { TypeormPokemonRepository } from './infrastructure/typeorm-pokemon.repos
 import { Pokemon } from './domain/entities/pokemon.entity';
 import { Type } from './domain/entities/type.entity';
 import { Appearance } from './domain/entities/appearance.entity';
+import { RateLimitInterceptor } from '../rate-limiter/interface/rate-limit.interceptor';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { Appearance } from './domain/entities/appearance.entity';
   controllers: [PokemonController],
   providers: [
     PokemonService,
+    RateLimitInterceptor,
     {
       provide: 'PokemonClient',
       useClass: PokeApiClient,

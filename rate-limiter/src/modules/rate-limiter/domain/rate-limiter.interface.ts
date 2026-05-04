@@ -9,4 +9,6 @@ export interface RateLimitStatus {
   remaining: number;
   limit: number;
   resetTime: number;
+  // ms until the next allow() would succeed; 0 when allowed=true
+  retryAfterMs: number;
 }
